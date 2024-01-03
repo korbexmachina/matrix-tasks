@@ -40,6 +40,7 @@ func InsertTask (task Task) error {
 
 // DeleteTask deletes a task from the database
 func DeleteTask (task Task) error {
+	// TODO: Fix this
 	return Delete(task.Bucket, fmt.Sprint(task.ID))
 }
 
@@ -107,4 +108,26 @@ func DeleteMatrix (path string) error {
 	}
 
 	return nil
+}
+
+// ReadTasks reads tasks from the Eisenhower Matrix
+func ReadTasks (path string) []Task {
+	var tasks []Task
+
+	// Create the database connection
+	InitDB(path)
+
+	// Read the tasks
+	for _, bucket := range Buckets {
+		keys, _ := GetBucketKeys(bucket)
+		for _, key := range keys {
+			value, err := Get(bucket, key)
+			if err != nil {
+				fmt.Println(err)
+			}
+			tasks = append(tasks, Task{ID: int(key[0]), Name: value, Bucket: bucket})
+		}
+	}
+
+	return tasks
 }

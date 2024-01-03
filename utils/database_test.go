@@ -47,9 +47,6 @@ func TestDelete(t *testing.T) {
 		t.Errorf("Error deleting key/value pair: %s", err)
 	}
 
-	// Print the matrix
-	PrintMatrix("test.db")
-
 	val, err := Get("test", "key")
 	if err != nil {
 		t.Errorf("Error getting value: %s", err)
