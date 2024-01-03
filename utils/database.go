@@ -50,10 +50,13 @@ func Insert(bucketName string, key string, value string) error {
 
 // Delete deletes a key/value pair from a bucket
 func Delete(bucketName string, key string) error {
-	return DB.Update(func(tx *bolt.Tx) error {
+	DB.Update(func (tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucketName))
-		return b.Delete([]byte(key))
+		err := b.Delete([]byte(key))
+		return err
 	})
+
+	return nil
 }
 
 // Get gets a value from a bucket
@@ -65,4 +68,35 @@ func Get(bucketName string, key string) (string, error) {
 		return nil
 	})
 	return value, err
+}
+
+// GetBucketKeys gets all keys from a bucket
+func GetBucketKeys(bucketName string) ([]string, error) {
+	var keys []string
+	err := DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketName))
+
+		b.ForEach(func(k, v []byte) error {
+			keys = append(keys, string(k))
+			return nil
+		})
+
+		return nil
+	})
+
+	return keys, err
+}
+
+// BucketExists checks if a bucket exists
+func BucketExists(bucketName string) bool {
+	var exists bool
+	DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketName))
+		if b != nil {
+			exists = true
+		}
+		return nil
+	})
+
+	return exists
 }
